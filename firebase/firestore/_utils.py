@@ -70,32 +70,33 @@ def _decode_datastore(value):
 	:raises TypeError: For value types that are unsupported.
 	"""
 
-	if value.get('nullValue', False) is None:
+	if 'nullValue' in value:
 		return value['nullValue']
 
-	elif value.get('booleanValue') is not None:
+	elif 'booleanValue' in value:
 		return bool(value['booleanValue'])
 
-	elif value.get('bytesValue'):
+	elif 'bytesValue' in value:
 		return b64decode(value['bytesValue'].encode('utf-8'))
 
-	elif value.get('integerValue'):
+	elif 'integerValue' in value:
 		return int(value['integerValue'])
 
-	elif value.get('doubleValue'):
+	elif 'doubleValue' in value:
 		return float(value['doubleValue'])
 
-	elif isinstance(value.get('stringValue'), str):
-		return str(value['stringValue'])
+	elif 'stringValue' in value and isinstance(value['stringValue'], str):
+		return value['stringValue']
 
-	elif value.get('mapValue'):
+	elif 'mapValue' in value:
 		return _from_datastore(value['mapValue'])
 
-	elif value.get('timestampValue'):
+	elif 'timestampValue' in value:
 		return DatetimeWithNanoseconds.from_rfc3339(value['timestampValue'])
 
-	elif value.get('geoPointValue'):
-		return GeoPoint(float(value['timestampValue']['latitude']), float(value['timestampValue']['longitude']))
+	elif 'geoPointValue' in value:
+		geo = value['geoPointValue']
+		return GeoPoint(float(geo['latitude']), float(geo['longitude']))
 
 	else:
 		raise TypeError("Cannot convert to a Python Value", value, "Invalid type", type(value))
